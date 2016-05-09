@@ -146,21 +146,36 @@ public class RandomPlayer extends Player {
 
 	public int evaluate(GameInfo info) {
 		int result = 0;
+		int[] size = { 13, 7, 6 };
+		int[][] ox = { {-1, -1, -1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 }, { 0, 0, 0, 0, 1, 1, 2 }, { -1, 0, 0, 0, 1, 1 } };
+		int[][] oy = { {2, 3, 4, 0, 1, 2, 3, 4, 5, 1, 2, 3, 4 }, { 0, 1, 2, 3, 1, 2, 1 }, { 2, 0, 1, 2, 1, 2 } };
 
-		for (int i = 3; i < GameInfo.PLAYER_NUM; i++) {
-			if (info.samuraiInfo[i].curX == info.samuraiInfo[i].homeX
-					&& info.samuraiInfo[i].curY == info.samuraiInfo[i].homeY) {
-				result = result + 10000;
+		for (int enemy = 3; enemy < GameInfo.PLAYER_NUM; enemy++) {
+			if (info.samuraiInfo[enemy].curX == info.samuraiInfo[enemy].homeX
+					&& info.samuraiInfo[enemy].curY == info.samuraiInfo[enemy].homeY) {
+				result = result + 100000;
 			}
 
-			if (info.samuraiInfo[i].curX != -1) {
-				int x = Math.max(info.samuraiInfo[info.weapon].curX, info.samuraiInfo[i].curX)
-						- Math.min(info.samuraiInfo[info.weapon].curX, info.samuraiInfo[i].curX);
-				int y = Math.max(info.samuraiInfo[info.weapon].curY, info.samuraiInfo[i].curY)
-						- Math.min(info.samuraiInfo[info.weapon].curY, info.samuraiInfo[i].curY);
-
-				if (x + y < 3) {
-					result = result - 10000;
+			for (int direction = 0; direction < 4; direction++) {
+				for (int i = 0; i < size[enemy - 3]; ++i) {
+					int[] pos = this.rotate(direction, ox[enemy - 3][i], oy[enemy - 3][i]);
+					pos[0] += info.samuraiInfo[enemy].curX;
+					pos[1] += info.samuraiInfo[enemy].curY;
+					if (0 <= pos[0] && pos[0] < info.width && 0 <= pos[1] && pos[1] < info.height) {
+						Boolean isHome = false;
+						for (int j = 0; j < GameInfo.PLAYER_NUM; ++j) {
+							if (info.samuraiInfo[j].homeX == pos[0] && info.samuraiInfo[j].homeY == pos[1]) {
+								isHome = true;
+							}
+						}
+						if (!isHome) {
+							if(info.samuraiInfo[info.weapon].curX == pos[0] && info.samuraiInfo[info.weapon].curY == pos[1]){
+								if(info.samuraiInfo[info.weapon].hidden == 0){
+									result = result - 50000;
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -175,8 +190,8 @@ public class RandomPlayer extends Player {
 				}
 			}
 		}
-        
-        int dx = info.samuraiInfo[info.weapon].curX - 7;
+
+		int dx = info.samuraiInfo[info.weapon].curX - 7;
 		int dy = info.samuraiInfo[info.weapon].curY - 7;
 		result = result - 5 * (dx * dx + dy * dy);
 
@@ -237,6 +252,27 @@ public class RandomPlayer extends Player {
 		}
 
 		return result;
+	}
+
+	public int[] rotate(int direction, int x0, int y0) {
+		int[] res = { 0, 0 };
+		if (direction == 0) {
+			res[0] = x0;
+			res[1] = y0;
+		}
+		if (direction == 1) {
+			res[0] = y0;
+			res[1] = -x0;
+		}
+		if (direction == 2) {
+			res[0] = -x0;
+			res[1] = -y0;
+		}
+		if (direction == 3) {
+			res[0] = -y0;
+			res[1] = x0;
+		}
+		return res;
 	}
 
 	public int[][] markAttackArea(GameInfo info) {

@@ -46,7 +46,6 @@ public class GameInfo {
 		}
 	}
 
-	//构造器
 	public GameInfo(GameInfo info) {
 		this.turns = info.turns;
 		this.side = info.side;
@@ -60,7 +59,6 @@ public class GameInfo {
 		this.field = info.field;
 	}
 
-	//构造器，获取游戏初始信息并且进行acknowledge response
 	public GameInfo() {
 		GameInfo.stdReader = new BufferedReader(new InputStreamReader(System.in));
 
@@ -92,7 +90,6 @@ public class GameInfo {
 		System.out.println("0");
 	}
 
-	//“单行”获取System给出的信息（读行[过滤comments] + 分隔）
 	public String[] read() {
 		String line = "";
 		try {
@@ -105,8 +102,6 @@ public class GameInfo {
 		return line.split("\\s");
 	}
 
-	//获取回合信息(turn表示现在是第几回合，curePeriod表示治愈时间还有多少个回合
-	//samuraiInfo.curX，samuraiInfo.curY，samuraiInfo.hidden分别表示武士的X坐标，Y坐标跟是否隐藏)
 	public void readTurnInfo() {
 		String[] res = this.read();
 
@@ -143,7 +138,6 @@ public class GameInfo {
 		}
 	}
 
-	//判断武士的动作是否有效
 	public Boolean isValid(int action) {
 		SamuraiInfo myself = this.samuraiInfo[this.weapon];
 		int curX = myself.curX;
@@ -332,4 +326,41 @@ public class GameInfo {
 		myself.curY = curY;
 		this.samuraiInfo[this.weapon] = myself;
 	}
+
+    public boolean equals(GameInfo info) {
+        boolean result;
+        boolean result1 = false;
+        boolean result2 = true;
+        boolean result3 = true;
+
+        if (this.turns == info.turns && this.side == info.side && this.weapon == info.weapon && this.width == info.width
+                && this.height == info.height && this.maxCure == info.maxCure && this.turn == info.turn
+                && this.curePeriod == info.curePeriod) {
+            result1 = true;
+        }
+
+        for (int i = 0; i < GameInfo.PLAYER_NUM; i++) {
+            if (this.samuraiInfo[i].homeX != info.samuraiInfo[i].homeX
+                    || this.samuraiInfo[i].homeY != info.samuraiInfo[i].homeY
+                    || this.samuraiInfo[i].curX != info.samuraiInfo[i].curX
+                    || this.samuraiInfo[i].curY != info.samuraiInfo[i].curY
+                    || this.samuraiInfo[i].rank != info.samuraiInfo[i].rank
+                    || this.samuraiInfo[i].score != info.samuraiInfo[i].score
+                    || this.samuraiInfo[i].hidden != info.samuraiInfo[i].hidden) {
+                result2 = false;
+            }
+        }
+
+        for (int i = 0; i < info.height; i++) {
+            for (int j = 0; j < info.width; j++) {
+                if (this.field[i][j] != info.field[i][j]) {
+                    result3 = false;
+                }
+            }
+        }
+
+        result = result1 && result2 && result3;
+
+        return result;
+    }
 }
