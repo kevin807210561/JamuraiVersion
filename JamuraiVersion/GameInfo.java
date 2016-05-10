@@ -327,7 +327,7 @@ public class GameInfo {
 		this.samuraiInfo[this.weapon] = myself;
 	}
 
-    public boolean equals(GameInfo info) {
+    public boolean isSameAs(GameInfo info) {
         boolean result;
         boolean result1 = false;
         boolean result2 = true;
