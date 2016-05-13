@@ -35,6 +35,10 @@ public class GameInfo {
 				this.samuraiInfo[i].rank = info.samuraiInfo[i].rank;
 				this.samuraiInfo[i].score = info.samuraiInfo[i].score;
 				this.samuraiInfo[i].hidden = info.samuraiInfo[i].hidden;
+				for (int j = 0; j < info.samuraiInfo[i].possibleX.size(); j++) {
+                    this.samuraiInfo[i].possibleX.add(info.samuraiInfo[i].possibleX.get(j));
+                    this.samuraiInfo[i].possibleY.add(info.samuraiInfo[i].possibleY.get(j));
+                }
 			}
 
 			this.field = new int[this.height][this.width];

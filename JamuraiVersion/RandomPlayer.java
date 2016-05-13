@@ -10,13 +10,13 @@ public class RandomPlayer extends Player {
 		this.rnd = new Random();
 	}
 
-	public GameInfo play(GameInfo info) {
-		ArrayList<ArrayList<Integer>> action = possibleAction(info);
+	public GameInfo play(GameInfo Info) {
+		ArrayList<ArrayList<Integer>> action = possibleAction(Info);
 		int[] grade = new int[action.size()];
 		int bestOne = 0;
 
 		for(int i = 0; i < action.size(); i++){
-			GameInfo infoCopy = new GameInfo(info, true);
+			GameInfo infoCopy = new GameInfo(Info, true);
 
 			for(int j = 0; j < action.get(i).size(); j++){
 				if(infoCopy.isValid(action.get(i).get(j))){
@@ -34,12 +34,12 @@ public class RandomPlayer extends Player {
 		}
 
 		for(int i = 0; i < action.get(bestOne).size(); i++){
-			if(info.isValid(action.get(bestOne).get(i))){
-				info.doAction(action.get(bestOne).get(i));
+			if(Info.isValid(action.get(bestOne).get(i))){
+				Info.doAction(action.get(bestOne).get(i));
 			}
 		}
 
-		return new GameInfo(info);
+		return new GameInfo(Info);
 	}
 
 	public int evaluate(GameInfo info) {
@@ -54,25 +54,44 @@ public class RandomPlayer extends Player {
 				result = result + 1000000;
 			}
 
-			for (int direction = 0; direction < 4; direction++) {
-				for (int i = 0; i < size[enemy - 3]; ++i) {
-					int[] pos = this.rotate(direction, ox[enemy - 3][i], oy[enemy - 3][i]);
-					pos[0] += info.samuraiInfo[enemy].curX;
-					pos[1] += info.samuraiInfo[enemy].curY;
-					if (0 <= pos[0] && pos[0] < info.width && 0 <= pos[1] && pos[1] < info.height) {
-						Boolean isHome = false;
-						for (int j = 0; j < GameInfo.PLAYER_NUM; ++j) {
-							if (info.samuraiInfo[j].homeX == pos[0] && info.samuraiInfo[j].homeY == pos[1]) {
-								isHome = true;
+			ArrayList<Integer> X = new ArrayList<>();
+			ArrayList<Integer> Y = new ArrayList<>();
+			if(info.samuraiInfo[enemy].curX != -1){
+				X.add(info.samuraiInfo[enemy].curX);
+				Y.add(info.samuraiInfo[enemy].curY);
+			}else {
+				for (int i = 0; i < info.samuraiInfo[enemy].possibleX.size(); i++) {
+					X.add(info.samuraiInfo[enemy].possibleX.get(i));
+					Y.add(info.samuraiInfo[enemy].possibleY.get(i));
+				}
+			}
+			int counter = 0;
+
+			for (int k = 0; k < X.size(); k++) {
+				for (int direction = 0; direction < 4; direction++) {
+					for (int i = 0; i < size[enemy - 3]; ++i) {
+						int[] pos = this.rotate(direction, ox[enemy - 3][i], oy[enemy - 3][i]);
+						pos[0] += X.get(k);
+						pos[1] += Y.get(k);
+						if (0 <= pos[0] && pos[0] < info.width && 0 <= pos[1] && pos[1] < info.height) {
+							Boolean isHome = false;
+							for (int j = 0; j < GameInfo.PLAYER_NUM; ++j) {
+								if (info.samuraiInfo[j].homeX == pos[0] && info.samuraiInfo[j].homeY == pos[1]) {
+									isHome = true;
+								}
 							}
-						}
-						if (!isHome) {
-							if(info.samuraiInfo[info.weapon].curX == pos[0] && info.samuraiInfo[info.weapon].curY == pos[1]){
-								result = result - 500000;
+							if (!isHome) {
+								if(info.samuraiInfo[info.weapon].curX == pos[0] && info.samuraiInfo[info.weapon].curY == pos[1]){
+									result = result - 500000;
+									counter++;
+								}
 							}
 						}
 					}
 				}
+			}
+			if (counter > 1){
+				result = result - counter * 500000 + 500000;
 			}
 		}
 
