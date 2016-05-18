@@ -1,18 +1,13 @@
 import jamurai.*;
 import java.util.*;
 
-public class RandomPlayer extends Player {
+public class Kevin807210561 extends Player {
 	public final int[] cost = { 0, 4, 4, 4, 4, 2, 2, 2, 2, 1, 1 };
 	public final int maxPower = 7;
-	public Random rnd;
-
-	public RandomPlayer() {
-		this.rnd = new Random();
-	}
 
 	public GameInfo play(GameInfo Info) {
-		ArrayList<ArrayList<Integer>> action = possibleAction(Info);
-		int[] grade = new int[action.size()];
+		ArrayList<ArrayList<Integer>> action = possibleAction();
+		int[] grades = new int[action.size()];
 		int bestOne = 0;
 
 		for(int i = 0; i < action.size(); i++){
@@ -24,11 +19,11 @@ public class RandomPlayer extends Player {
 				}
 			}
 
-			grade[i] = evaluate(infoCopy);
+			grades[i] = evaluate(infoCopy);
 		}
 
-		for(int i = 0; i < grade.length; i++){
-			if(grade[i] > grade[bestOne]){
+		for(int i = 0; i < grades.length; i++){
+			if(grades[i] > grades[bestOne]){
 				bestOne = i;
 			}
 		}
@@ -44,9 +39,11 @@ public class RandomPlayer extends Player {
 
 	public int evaluate(GameInfo info) {
 		int result = 0;
+		int[] distance = {0, 4, 3};
 		int[] size = { 13, 7, 6 };
 		int[][] ox = { {-1, -1, -1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 }, { 0, 0, 0, 0, 1, 1, 2 }, { -1, 0, 0, 0, 1, 1 } };
 		int[][] oy = { {2, 3, 4, 0, 1, 2, 3, 4, 5, 1, 2, 3, 4 }, { 0, 1, 2, 3, 1, 2, 1 }, { 2, 0, 1, 2, 1, 2 } };
+
 
 		for (int enemy = 3; enemy < GameInfo.PLAYER_NUM; enemy++) {
 			if (info.samuraiInfo[enemy].curX == info.samuraiInfo[enemy].homeX
@@ -93,6 +90,16 @@ public class RandomPlayer extends Player {
 			if (counter > 1){
 				result = result - counter * 500000 + 500000;
 			}
+
+			if (info.weapon == 0){
+				if (enemy > 3){
+					int x = info.samuraiInfo[info.weapon].curX - info.samuraiInfo[enemy].curX;
+					int y = info.samuraiInfo[info.weapon].curY - info.samuraiInfo[enemy].curY;
+					if (Math.max(Math.abs(x), Math.abs(y)) == distance[enemy - 3] && Math.min(Math.abs(x), Math.abs(y)) == 0 && info.samuraiInfo[info.weapon].hidden == 1){
+						result = result + 10000;
+					}
+				}
+			}
 		}
 
 		for (int i = 0; i < info.height; i++) {
@@ -110,8 +117,8 @@ public class RandomPlayer extends Player {
 		return result;
 	}
 
-	public ArrayList<ArrayList<Integer>> possibleAction(GameInfo info) {
-		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>(2000);
+	public ArrayList<ArrayList<Integer>> possibleAction() {
+		ArrayList<ArrayList<Integer>> result = new ArrayList<>(2000);
 
 		for (int i = 1; i <= 10; i++) {
 			for (int j = 1; j <= 10; j++) {
@@ -160,31 +167,6 @@ public class RandomPlayer extends Player {
 			if (allCost <= maxPower) {
 				result.add(new ArrayList<Integer>());
 				result.get(result.size() - 1).add(i);
-			}
-		}
-
-		for(int i = 0; i < result.size() - 1; i++){
-			GameInfo infoCopy1 = new GameInfo(info, true);
-
-			for (int k = 0; k < result.get(i).size(); k++) {
-				if (infoCopy1.isValid(result.get(i).get(k))) {
-					infoCopy1.virtualDoAction(result.get(i).get(k));
-				}
-			}
-
-			for(int j = i + 1; j < result.size(); j++){
-				GameInfo infoCopy2 = new GameInfo(info, true);
-
-				for (int k = 0; k < result.get(j).size(); k++) {
-					if (infoCopy2.isValid(result.get(j).get(k))) {
-						infoCopy2.virtualDoAction(result.get(j).get(k));
-					}
-				}
-
-				if(infoCopy1.isSameAs(infoCopy2)){
-					result.remove(j);
-					j--;
-				}
 			}
 		}
 

@@ -5,7 +5,7 @@ public class Main {
     public static void main(String[] argv) throws IOException {
         GameInfo curInfo = new GameInfo();
         GameInfo preInfo;
-        Player p = new RandomPlayer();
+        Player p = new Kevin807210561();
 
         curInfo.readTurnInfo();
         preInfo = new GameInfo(curInfo, true);

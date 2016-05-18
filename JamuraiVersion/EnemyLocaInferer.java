@@ -18,81 +18,112 @@ public class EnemyLocaInferer {
         }
 
         for (int enemy = 3; enemy < 6; enemy++) {
-            if (curInfo.samuraiInfo[enemy].curX == -1 && enemy != curInfo.weapon + 3) {
-                boolean canInfer = false;
+            boolean canInfer1;
+            boolean canInfer2 = false;
+            boolean canInfer;
 
-                for (int i = 0; i < diffs.changeID.size(); i++) {
-                    if (diffs.changeID.get(i) == enemy) {
-                        canInfer = true;
-                        break;
+            canInfer1 = curInfo.samuraiInfo[enemy].curX == -1 && enemy != curInfo.weapon + 3;
+            for (int i = 0; i < diffs.changeID.size(); i++) {
+                if (diffs.changeID.get(i) == enemy) {
+                    canInfer2 = true;
+                    break;
+                }
+            }
+            canInfer = canInfer1 && canInfer2;
+
+            if (canInfer) {
+                ArrayList<Integer> tempPossibleX = new ArrayList<>();
+                ArrayList<Integer> tempPossibleY = new ArrayList<>();
+                int counter1 = 0;
+
+                for (int k = 0; k < diffs.changeID.size(); k++) {
+                    if (diffs.changeID.get(k) == enemy) {
+                        counter1++;
                     }
                 }
 
-                if (canInfer) {
-                    for (int i = 0; i < curInfo.height; i++) {
-                        for (int j = 0; j < curInfo.width; j++) {
-                            //if (curInfo.field[i][j] != 9){
-                            for (int direction = 0; direction < 4; direction++) {
-                                boolean isPossible;
-                                boolean containAllDiffs = false;
-                                boolean allEnemyAndNine = true;
-                                int counter1 = 0;
-                                int counter2 = 0;
+                for (int i = 0; i < curInfo.height; i++) {
+                    for (int j = 0; j < curInfo.width; j++) {
+                        for (int direction = 0; direction < 4; direction++) {
+                            boolean isPossible;
+                            boolean containAllDiffs = false;
+                            boolean allEnemyAndNine = true;
+                            int counter2 = 0;
 
-                                for (int k = 0; k < diffs.changeID.size(); k++) {
-                                    if (diffs.changeID.get(k) == enemy) {
-                                        counter1++;
-                                    }
-                                }
+                            for (int k = 0; k < size[enemy - 3]; ++k) {
+                                int[] pos = EnemyLocaInferer.rotate(direction, ox[enemy - 3][k], oy[enemy - 3][k]);
+                                pos[0] += j;
+                                pos[1] += i;
+                                if (0 <= pos[0] && pos[0] < preInfo.width && 0 <= pos[1] && pos[1] < preInfo.height) {
+                                    Boolean isHome = false;
 
-                                for (int k = 0; k < size[enemy - 3]; ++k) {
-                                    int[] pos = EnemyLocaInferer.rotate(direction, ox[enemy - 3][k], oy[enemy - 3][k]);
-                                    pos[0] += j;
-                                    pos[1] += i;
-                                    if (0 <= pos[0] && pos[0] < preInfo.width && 0 <= pos[1] && pos[1] < preInfo.height) {
-                                        Boolean isHome = false;
-
-                                        for (int l = 0; l < GameInfo.PLAYER_NUM; ++l) {
-                                            if (preInfo.samuraiInfo[l].homeX == pos[0] && preInfo.samuraiInfo[l].homeY == pos[1]) {
-                                                isHome = true;
-                                            }
+                                    for (int l = 0; l < GameInfo.PLAYER_NUM; ++l) {
+                                        if (preInfo.samuraiInfo[l].homeX == pos[0] && preInfo.samuraiInfo[l].homeY == pos[1]) {
+                                            isHome = true;
                                         }
+                                    }
 
-                                        if (!isHome) {
-                                            for (int l = 0; l < diffs.changeID.size(); l++) {
-                                                if (diffs.changeID.get(l) == enemy) {
-                                                    if (pos[0] == diffs.changedX.get(l) && pos[1] == diffs.changedY.get(l)) {
-                                                        counter2++;
-                                                        break;
-                                                    }
+                                    if (!isHome) {
+                                        for (int l = 0; l < diffs.changeID.size(); l++) {
+                                            if (diffs.changeID.get(l) == enemy) {
+                                                if (pos[0] == diffs.changedX.get(l) && pos[1] == diffs.changedY.get(l)) {
+                                                    counter2++;
+                                                    break;
                                                 }
                                             }
+                                        }
 
-                                            if (curInfo.field[pos[1]][pos[0]] != enemy && curInfo.field[pos[1]][pos[0]] != 9) {
-                                                allEnemyAndNine = false;
-                                                break;
-                                            }
+                                        if (curInfo.field[pos[1]][pos[0]] != enemy && curInfo.field[pos[1]][pos[0]] != 9) {
+                                            allEnemyAndNine = false;
                                         }
                                     }
                                 }
-
-                                if (counter1 == counter2) {
-                                    containAllDiffs = true;
-                                }
-
-                                isPossible = containAllDiffs && allEnemyAndNine;
-
-                                if (isPossible) {
-                                    curInfo.samuraiInfo[enemy].possibleX.add(j);
-                                    curInfo.samuraiInfo[enemy].possibleY.add(i);
-                                    break;
-                                }
                             }
-                            // }
+
+                            if (counter1 == counter2) {
+                                containAllDiffs = true;
+                            }
+
+                            isPossible = containAllDiffs && allEnemyAndNine;
+
+                            if (isPossible) {
+                                curInfo.samuraiInfo[enemy].possibleX.add(j);
+                                curInfo.samuraiInfo[enemy].possibleY.add(i);
+                            }
+                            if (containAllDiffs) {
+                                tempPossibleX.add(j);
+                                tempPossibleY.add(i);
+                                break;
+                            }
                         }
                     }
+                }
 
-                    if (curInfo.samuraiInfo[enemy].possibleX.size() == 1 && preInfo.samuraiInfo[enemy].curX != -1 && (preInfo.samuraiInfo[enemy].curX != curInfo.samuraiInfo[enemy].possibleX.get(0) || preInfo.samuraiInfo[enemy].curY != curInfo.samuraiInfo[enemy].possibleY.get(0))) {
+                if (curInfo.samuraiInfo[enemy].possibleX.size() == 0) {
+                    for (int i = 0; i < tempPossibleX.size(); i++) {
+                        curInfo.samuraiInfo[enemy].possibleX.add(tempPossibleX.get(i));
+                        curInfo.samuraiInfo[enemy].possibleY.add(tempPossibleY.get(i));
+                    }
+                }
+
+                for (int i = 0; i < curInfo.samuraiInfo[enemy].possibleX.size(); i++) {
+                    int x = curInfo.samuraiInfo[enemy].possibleX.get(i);
+                    int y = curInfo.samuraiInfo[enemy].possibleY.get(i);
+                    if (curInfo.field[y][x] == 8 || curInfo.field[y][x] < 3) {
+                        curInfo.samuraiInfo[enemy].possibleX.remove(i);
+                        curInfo.samuraiInfo[enemy].possibleY.remove(i);
+                    }
+                }
+
+                if (curInfo.samuraiInfo[enemy].possibleX.size() == 1) {
+                    if (preInfo.samuraiInfo[enemy].curX != -1 && (preInfo.samuraiInfo[enemy].curX != curInfo.samuraiInfo[enemy].possibleX.get(0) || preInfo.samuraiInfo[enemy].curY != curInfo.samuraiInfo[enemy].possibleY.get(0))) {
+                        curInfo.samuraiInfo[enemy].curX = curInfo.samuraiInfo[enemy].possibleX.get(0);
+                        curInfo.samuraiInfo[enemy].curY = curInfo.samuraiInfo[enemy].possibleY.get(0);
+                        curInfo.samuraiInfo[enemy].possibleX.remove(0);
+                        curInfo.samuraiInfo[enemy].possibleY.remove(0);
+                    }
+
+                    if (preInfo.samuraiInfo[enemy].curX == -1) {
                         curInfo.samuraiInfo[enemy].curX = curInfo.samuraiInfo[enemy].possibleX.get(0);
                         curInfo.samuraiInfo[enemy].curY = curInfo.samuraiInfo[enemy].possibleY.get(0);
                         curInfo.samuraiInfo[enemy].possibleX.remove(0);
